@@ -24,7 +24,7 @@ struct ballLocation {
     int currentY;
     int previousX;
     int previousY;
-}ball;
+} ball;
 
 void gotoxy(int x, int y) {
     HANDLE consoleHandle = GetStdHandle(STD_OUTPUT_HANDLE);
@@ -87,65 +87,85 @@ int clear(int i, int j) {
 }
 
 
-void findLocationBall(){
-    clear(ball.previousX,ball.previousY);
-    int x = ball.currentX + (ball.currentX - ball.previousX);
-    int y = ball.currentY + (ball.currentY - ball.previousY);
-    ball.previousX = ball.currentX;
-    ball.previousY = ball.currentY;
-    if(y<=0 || y >= screenY){
-        ball.currentX = x ;
-        ball.currentY = y * -1;
-    }else {
-        ball.currentX = x ;
-        ball.currentY = y ;
-    }
-    gotoxy(ball.currentX,ball.currentY);
-    printf("%c",254);
-    gotoxy(0,screenY+5);
-    printf("ball %d , %d",ball.currentX,ball.currentY);
-    sleep(1);
-}
 
-void initBall(){
+
+void initBall() {
     int randX;
     int randY;
-    while(int ran =  rand() % 3){
-        if(ran-3 != 0){
-            randX = ran-3;
+    while (int ran = rand() % 3) {
+        if (ran - 3 != 0) {
+            randX = ran - 3;
             break;
         }
     }
-    while(int ran =  rand() % 3){
-        if(ran-3 != 0){
-            randY = ran-3;
+    while (int ran = rand() % 3) {
+        if (ran - 3 != 0) {
+            randY = ran - 3;
             break;
         }
     }
 
 
-    ball.previousX = screenX/2;
-    ball.previousY = screenY/2;
+    ball.previousX = screenX / 2;
+    ball.previousY = screenY / 2;
     ball.currentY = randY + ball.previousY;
     ball.currentX = randX + ball.previousX;
 }
+void findLocationBall() {
+    while (true) {
+        clear(ball.currentX, ball.currentY);
+        int x = ball.currentX - ball.previousX;
+        int y = ball.currentY - ball.previousY;
+        ball.previousX = ball.currentX;
+        ball.previousY = ball.currentY;
+        if(ball.currentX <= 0 || ball.currentX>=screenX){
+            initBall();
+        }
+        else if ((ball.currentX == player1[0].xPos || ball.currentX == player2[0].xPos)
+                 && ((ball.currentY <= player1[1].currentPositionY + 1 &&
+                      ball.currentY >= player1[1].currentPositionY - 1) ||
+                     (ball.currentY <= player2[1].currentPositionY + 1 &&
+                      ball.currentY >= player2[1].currentPositionY - 1)
 
+                 )) {
+            x = x * -1;
+            ball.currentX = x + ball.currentX;
+            ball.currentY = y + ball.currentY;
+
+        }
+        else
+
+        if (ball.currentY + y <= 0 || ball.currentY + y >= screenY) {
+            y = y * -1;
+            ball.currentX = x + ball.currentX;
+            ball.currentY = y + ball.currentY;
+        }else {
+            ball.currentX += x;
+            ball.currentY += y;
+        }
+        gotoxy(ball.currentX, ball.currentY);
+        printf("%c", 254);
+        gotoxy(0, screenY + 5);
+        printf("ball %d , %d", ball.currentX, ball.currentY);
+        sleep(1);
+    }
+}
 void drawPlayer(Player player[]) {
     //todo implemnet socket here
     for (int i = 0; i < cursorLen; i++) {
 //        printf("%d",direction);
-        if (player[0].direction!= -10) {
+        if (player[0].direction != -10) {
             if (player[0].direction == UP) {
                 clear(player[0].xPos, player[i].previousPositionY);
                 gotoxy(player[0].xPos, player[i].currentPositionY);
                 printf("%c", 186);
             } else if (player[0].direction == DOWN) {
-                clear(player[0].xPos, player[cursorLen-1 - i].previousPositionY);
-                gotoxy(player[0].xPos, player[cursorLen-1 - i].currentPositionY);
+                clear(player[0].xPos, player[cursorLen - 1 - i].previousPositionY);
+                gotoxy(player[0].xPos, player[cursorLen - 1 - i].currentPositionY);
                 printf("%c", 186);
 
             }
-        }else {
+        } else {
             gotoxy(player[0].xPos, player[i].currentPositionY);
             printf("%c", 186);
         }
@@ -171,14 +191,13 @@ int keyPress() {
             player1[0].direction = DOWN;
             player1[0].canPlay = true;
             return key;
-        }
-        else if(key==119) {
+        } else if (key == 119) {
             player2[0].direction = UP;
             player2[0].canPlay = true;
             return key;
         }// w Button
 
-        else if(key==115){
+        else if (key == 115) {
             player2[0].direction = DOWN;
             player2[0].canPlay = true;
             return key;
@@ -200,7 +219,7 @@ void actionPlayer(Player player[]) {
                 player[i].currentPositionY = player[i - 1].previousPositionY;
             }
             drawPlayer(player);
-        } else if (player[0].direction == DOWN && player[cursorLen - 1].currentPositionY < screenY-1) {
+        } else if (player[0].direction == DOWN && player[cursorLen - 1].currentPositionY < screenY - 1) {
             player[cursorLen - 1].previousPositionY = player[cursorLen - 1].currentPositionY;
             player[cursorLen - 1].currentPositionY += player[0].direction;
             for (int i = cursorLen - 2; i >= 0; i--) {
@@ -209,10 +228,10 @@ void actionPlayer(Player player[]) {
             }
             drawPlayer(player);
         }
-        gotoxy(0,screenY+3);
+        gotoxy(0, screenY + 3);
         for (int i = 0; i < cursorLen; i++) {
-            printf("previ %d ",player[i].previousPositionY);
-            printf("current %d ",player[i].currentPositionY );
+            printf("previ %d ", player[i].previousPositionY);
+            printf("current %d ", player[i].currentPositionY);
             printf("\n");
 
         }
@@ -230,9 +249,9 @@ void resetPlayerLocation(Player player[]) {
             player[i].xPos = 2;
         }
 //        player[i].xPos = 2;
-        player[i].currentPositionY = screenY / 2 +i ;
+        player[i].currentPositionY = screenY / 2 + i;
 //        player[i].currentPositionY = i+5 ;
-        player[i].previousPositionY = player[i].currentPositionY ;
+        player[i].previousPositionY = player[i].currentPositionY;
         player[i].canPlay = false;
     }
 }
@@ -241,6 +260,14 @@ void init() {
     resetPlayerLocation(player1);
     resetPlayerLocation(player2);
     initBall();
+}
+
+DWORD WINAPI play(Player player[]) {
+    while (true) {
+        if (keyPress()) {
+            actionPlayer(player);
+        }
+    }
 }
 
 void game() {
@@ -257,13 +284,31 @@ void game() {
 }
 
 
-
-
 int main(int argc, char const *argv[]) {
 //    cout << "Salam Donya!";
     init();
     clearScreen();
     drawScreen();
-    game();
-    return 0;
+    initBall();
+    HANDLE hThreadArray[3];
+    DWORD dwThreadIdArray[3];
+    hThreadArray[0] = CreateThread(
+            NULL,                   // default security attributes
+            0,                      // use default stack size
+            reinterpret_cast<LPTHREAD_START_ROUTINE>(play),       // thread function name
+            player1,          // argument to thread function
+            0,                      // use default creation flags
+            &dwThreadIdArray[0]);// returns the thread identifier
+    hThreadArray[1] = CreateThread(
+            NULL,                   // default security attributes
+            0,                      // use default stack size
+            reinterpret_cast<LPTHREAD_START_ROUTINE>(play),       // thread function name
+            player2,          // argument to thread function
+            0,                      // use default creation flags
+            &dwThreadIdArray[1]);
+
+    findLocationBall();
+
+//    game();
+//    return 0;
 }
